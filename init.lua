@@ -40,23 +40,23 @@ local function get_command(analyzer)
 end
 --------------------------------------------------------------------------------
 local function analyze_file()
-	-- Find available analyzer.
+	-- Find an available analyzer.
 	local analyzer = analyzers[buffer:get_lexer()]
 	if not analyzer then return end
-	-- Configure analyzer.
+	-- Configure the analyzer.
 	analyzer.configure()
-	-- Analyze file.
+	-- Analyze the file.
 	local issues
 	local handle = io.popen(get_command(analyzer))
 	issues = analyzer.parse_issues(handle)
 	handle:close()
-	-- Remove previous issues.
+	-- Remove the previous issues.
 	buffer.indicator_current = indicators.error
 	buffer:indicator_clear_range(0, buffer.length)
 	buffer.indicator_current = indicators.warning
 	buffer:indicator_clear_range(0, buffer.length)
 	buffer:eol_annotation_clear_all()
-	-- Mark errors.
+	-- Mark the errors.
 	local error_index = 0
 	buffer.indicator_current = indicators.error
 	for at, issue in pairs(issues.errors) do
@@ -65,7 +65,7 @@ local function analyze_file()
 		buffer.eol_annotation_text[issue.line] =
 			buffer.eol_annotation_text[issue.line]..issue.message.."; "
 	end
-	-- Mark warnings.
+	-- Mark the warnings.
 	local warning_index = 0
 	buffer.indicator_current = indicators.warning
 	for at, issue in pairs(issues.warnings) do

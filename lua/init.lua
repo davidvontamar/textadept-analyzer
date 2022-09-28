@@ -7,28 +7,41 @@ analyzer.config = {
 	command = "luacheck",
 	options = {
 		[1] = {
-			["--std"] = "lua51" -- "lua51", "lua52", "lua53", "luajit" etc...
+			-- "lua51", "lua52", "lua53", "luajit" etc...
+			["--std"] = "lua51"
 		},
 		-- Options for filtering warnings:
 		[2] = {
-			["--no-global"] = false, -- Filter out warnings related to global variables.
-			["--no-unused"] = false, -- Filter out warnings related to unsed variables and values.
-			["--no-redefined"] = false, -- Filter out warnings related to redefined variables.
-			["--no-unused-args"] = false, -- Filter out warnings related to unused arguments and loop variables.
-			["--no-unused-secondaries"] = false, -- Filter out warnings related to unused variables set together with used ones.
-			["--no-self"] = false, -- Filter out warnings related to implicit self argument.
+			-- Filter out warnings related to global variables.
+			["--no-global"] = false,
+			-- Filter out warnings related to unsed variables and values.
+			["--no-unused"] = false,
+			-- Filter out warnings related to redefined variables.
+			["--no-redefined"] = false,
+			-- Filter out warnings related to unused arguments and loop variables.
+			["--no-unused-args"] = false,
+			-- Filter out warnings related to unused variables set together with used ones.
+			["--no-unused-secondaries"] = false,
+			-- Filter out warnings related to implicit self argument.
+			["--no-self"] = false,
 		},
 		-- Options for line length limits:
 		[3] = {
-			["--max-line-length"] = 80, -- Set maximum allowed line length (default: 120).
-			["--no-max-string-line-length"] = true, -- Do not limit string line length.
-			["--no-max-comment-line-length"] = true, -- Do not limit string line length.
+			-- Set maximum allowed line length (default: 120).
+			["--max-line-length"] = 80,
+			-- Do not limit string line length.
+			["--no-max-comment-line-length"] = true,
+			-- Do not limit string line length.
+			["--no-max-string-line-length"] = true,
 		},
 		-- Output formatting options:
 		[4] = {
-			["--codes"] = true, -- Show warning codes.
-			["--ranges"] = true, -- Show ranges of columns related to warnings.
-			["--no-color"] = true, -- Do not color output.
+			-- Show warning codes.
+			["--codes"] = true,
+			-- Show ranges of columns related to warnings.
+			["--ranges"] = true,
+			-- Do not color output.
+			["--no-color"] = true,
 		},
 		-- Filename
 		[5] = {
@@ -36,8 +49,10 @@ analyzer.config = {
 		},
 		-- Options for globals:
 		[6] = {
-			["--globals"] = false, -- Add read-only global variables or fields.
-			["--read-globals"] = false, -- Add read-only global variables or fields.
+			-- Add read-only global variables or fields.
+			["--globals"] = false,
+			-- Add read-only global variables or fields.
+			["--read-globals"] = false,
 		}
 	}
 }
