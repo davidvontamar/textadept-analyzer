@@ -1,2 +1,2 @@
-# textadept-analyzer
-A textadept module for static analyzers
+# Textadept Static Analysis Module
+This module integrates static analyzers with Textadept. Currently, the module integrates luacheck with annotations and indicators (squiggle markers) for errors and warnings within the code editor. The module calls the static analyzer when a file is saved, when a new buffer is created, or when buffers are switched. You can integrate additional static analyzers with this module by following the luacheck example. The module takes the responsbility of displaying the errors and warnings within the editor itself; however, your submodule is expected to: (a) provide the shell command with all the options and arguments; (b) parse the output of the static analyzer; and (c) sort the results into errors and warnings (see how all of this is done with the luacheck example).
