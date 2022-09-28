@@ -14,7 +14,7 @@ analyzer.config = {
 		[2] = {
 			-- Filter out warnings related to global variables.
 			["--no-global"] = false,
-			-- Filter out warnings related to unsed variables and values.
+			-- Filter out warnings related to unused variables and values.
 			["--no-unused"] = false,
 			-- Filter out warnings related to redefined variables.
 			["--no-redefined"] = false,
@@ -63,7 +63,9 @@ function analyzer.configure()
 	-- Add Textadept's globals if appropriate.
 	if (buffer.filename):match(".*textadept.*") then
 		analyzer.config.options[6]["--globals"] = textadept_globals
-	end
+	else
+    analyzer.config.options[6]["--globals"] = false
+  end
 end
 --------------------------------------------------------------------------------
 function analyzer.parse_issues(handle)
