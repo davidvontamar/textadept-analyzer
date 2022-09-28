@@ -1,7 +1,7 @@
 --------------------------------------------------------------------------------
 -- Written by David von Tamar © MIT License.
 --------------------------------------------------------------------------------
--- Lexers are on the left, and thei analyzers are on the right.
+-- Lexers are on the left, and their analyzers are on the right.
 --------------------------------------------------------------------------------
 local analyzers = {
 	["lua"] = require("textadept-analyzer.lua"),
@@ -96,3 +96,6 @@ events.connect(events.INITIALIZED, init_styles)
 events.connect(events.FILE_AFTER_SAVE, analyze_file)
 events.connect(events.BUFFER_AFTER_SWITCH, analyze_file)
 events.connect(events.BUFFER_NEW, analyze_file)
+--------------------------------------------------------------------------------
+-- EOF
+--------------------------------------------------------------------------------
