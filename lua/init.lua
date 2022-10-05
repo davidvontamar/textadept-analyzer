@@ -3,7 +3,7 @@
 --------------------------------------------------------------------------------
 local analyzer = {}
 --------------------------------------------------------------------------------
-analyzer.command = "luacheck --codes --ranges --no-color"
+analyzer.command = "luacheck --codes --ranges"
 --------------------------------------------------------------------------------
 function analyzer.parse_issues(handle)
 	local issues = {errors = {}, warnings = {}}
