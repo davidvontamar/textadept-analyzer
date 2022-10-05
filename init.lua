@@ -46,7 +46,9 @@ local function analyze_file()
 	if not analyzer then return end
 	-- Analyze the file.
 	local issues
-	local handle = os.spawn(analyzer.command.." "..buffer.filename)
+	local handle = os.spawn(
+		analyzer.command.." "..buffer.filename,
+		io.get_project_root())
 	issues = analyzer.parse_issues(handle)
 	handle:close()
 	-- Remove the previous issues.
