@@ -40,32 +40,13 @@ local function init_styles()
 	view.eol_annotation_visible = view.EOLANNOTATION_STANDARD
 end
 --------------------------------------------------------------------------------
-local function get_command(analyzer)
-	local command = analyzer.config.command
-	for _, optiongroup in ipairs(analyzer.config.options) do
-		for key, value in pairs(optiongroup) do
-			if value then
-				command = command.." "..key
-				if type(value) == "number" or type(value) == "string" then
-					command = command.." "..value
-				elseif type(value) == "function" then
-					command = command.." "..value()
-				end
-			end
-		end
-	end
-	return command
-end
---------------------------------------------------------------------------------
 local function analyze_file()
 	-- Find an available analyzer.
 	local analyzer = analyzers[buffer:get_lexer()]
 	if not analyzer then return end
-	-- Configure the analyzer.
-	analyzer.configure()
 	-- Analyze the file.
 	local issues
-	local handle = io.popen(get_command(analyzer))
+	local handle = os.spawn(analyzer.command.." "..buffer.filename)
 	issues = analyzer.parse_issues(handle)
 	handle:close()
 	-- Remove the previous issues.
@@ -73,7 +54,7 @@ local function analyze_file()
 	buffer:indicator_clear_range(0, buffer.length)
 	buffer.indicator_current = indicators.warning
 	buffer:indicator_clear_range(0, buffer.length)
-	buffer:annotation_clear_all()
+	buffer:eol_annotation_clear_all()
 	-- Mark the errors.
 	local error_index = 0
 	buffer.indicator_current = indicators.error
