@@ -25,7 +25,7 @@ local function init_styles()
 	if not view.styles["warning"] then
 		view.styles["warning"] = {
 			fore = 0x000000,
-			back = view.colors["error"],
+			back = view.colors["warning"],
 		}
 	end
 	-- Error
