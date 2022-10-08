@@ -7,92 +7,139 @@ local analyzers = {
 	["lua"] = require("textadept-analyzer.lua"),
 }
 --------------------------------------------------------------------------------
-local indicators = {}
+local issue_types = {
+	ERROR = 1,
+	WARNING = 2,
+	INFO = 3
+}
+--------------------------------------------------------------------------------
+local issue_names = {}
+local annotation_styles = {}
+local indicator_types = {}
+local indicator_styles = {}
+local indicator_colors = {}
 --------------------------------------------------------------------------------
 local function init_styles()
-	-- Default Colors
-	-- These colors are used if the current theme does not define them.
-	if not view.colors["error"] then view.colors["error"] = 0x3c14dc end
-	if not view.colors["warning"] then view.colors["warning"] = 0x00c0ff end
-	-- Default Styles
-	-- These styles are used if the current theme does not define them.
+	-- Define default colors
+	if not view.colors["error"] then view.colors["error"] = view.colors["red"] end
+	if not view.colors["warning"] then view.colors["warning"] = view.colors["yellow"] end
+	if not view.colors["info"] then view.colors["info"] = view.colors["blue"] end
+	-- Define defualt styles
 	if not view.styles["error"] then
 		view.styles["error"] = {
-			fore = 0xffffff,
+			fore = view.colors["white"],
 			back = view.colors["error"],
 		}
 	end
 	if not view.styles["warning"] then
 		view.styles["warning"] = {
-			fore = 0x000000,
+			fore = view.colors["black"],
 			back = view.colors["warning"],
 		}
 	end
-	-- Error
-	indicators.error = _SCINTILLA.next_indic_number()
-	view.indic_style[indicators.error] = view.INDIC_SQUIGGLEPIXMAP
-	view.indic_fore[indicators.error] = view.colors["error"]
-	-- Warning
-	indicators.warning = _SCINTILLA.next_indic_number()
-	view.indic_style[indicators.warning] = view.INDIC_SQUIGGLEPIXMAP
-	view.indic_fore[indicators.warning] = view.colors["warning"]
-	-- Annotation type
-	view.eol_annotation_visible = view.EOLANNOTATION_STANDARD
+	if not view.styles["info"] then
+		view.styles["info"] = {
+			fore = view.colors["white"],
+			back = view.colors["info"],
+		}
+	end
+	-- Names for statsbar summary
+	issue_names[issue_types.ERROR] = "error(s)"
+	issue_names[issue_types.WARNING] = "warning(s)"
+	issue_names[issue_types.INFO] = "note(s)"
+	-- Styles for annotations
+	annotation_styles[issue_types.ERROR] = buffer:style_of_name("error")
+	annotation_styles[issue_types.WARNING] = buffer:style_of_name("warning")
+	annotation_styles[issue_types.INFO] = buffer:style_of_name("info")
+	-- Indicator types
+	indicator_types[issue_types.ERROR] = _SCINTILLA.next_indic_number()
+	indicator_types[issue_types.WARNING] = _SCINTILLA.next_indic_number()
+	indicator_types[issue_types.INFO] = _SCINTILLA.next_indic_number()
+	-- Styles for indicators
+	indicator_styles[issue_types.ERROR] = view.INDIC_SQUIGGLEPIXMAP
+	indicator_styles[issue_types.WARNING] = view.INDIC_SQUIGGLEPIXMAP
+	indicator_styles[issue_types.INFO] = view.INDIC_DOTS
+	-- Colors for indicators
+	indicator_colors[issue_types.ERROR] = view.colors["error"]
+	indicator_colors[issue_types.WARNING] = view.colors["warning"]
+	indicator_colors[issue_types.INFO] = view.colors["info"]
+	-- Apply styles
+	for _, issue_type in pairs(issue_types) do
+		view.indic_style[indicator_types[issue_type]] = indicator_styles[issue_type]
+		view.indic_fore[indicator_types[issue_type]] = indicator_colors[issue_type]
+	end
+end
+--------------------------------------------------------------------------------
+local function clear_issues()
+	for _, issue_type in pairs(issue_types) do
+		buffer.indicator_current = indicator_types[issue_type]
+		buffer:indicator_clear_range(0, buffer.length)
+	end
+	buffer:eol_annotation_clear_all()
+end
+--------------------------------------------------------------------------------
+local function parse_issues(handle, analyzer)
+	local issues = {}
+	local line = handle:read()
+	while line do
+		local issue = {}
+		local line_index, from, to, type, message = analyzer.parse_issue(line)
+		if message then
+			issue.line = line_index
+			issue.at = buffer:position_from_line(line_index) + from - 1
+			issue.length = buffer:position_from_line(line_index) + to - issue.at
+			issue.message = message
+			issue.type = type
+			table.insert(issues, issue)
+		end
+		line = handle:read()
+	end
+	return issues
+end
+--------------------------------------------------------------------------------
+local function update_statusbar(counts)
+	local summary = ""
+	for issue_type, count in pairs(counts) do
+		if count > 0 then
+			if summary ~= "" then summary = summary..", and " end
+			summary = count.." "..summary..issue_names[issue_type]
+		end
+	end
+	if summary ~= "" then
+		summary = "Found "..summary
+	else
+		summary = "No issues found."
+	end
+	ui.statusbar_text = summary
 end
 --------------------------------------------------------------------------------
 local function analyze_file()
+	ui.statusbar_text = "Analyzing file..."
 	-- Find an available analyzer.
 	local analyzer = analyzers[buffer:get_lexer()]
 	if not analyzer then return end
+	-- Remove the previous issues.
+	clear_issues()
 	-- Analyze the file.
-	local issues
 	local handle = os.spawn(
 		analyzer.command.." "..buffer.filename,
 		io.get_project_root())
-	issues = analyzer.parse_issues(handle)
+	local issues = parse_issues(handle, analyzer)
 	handle:close()
-	-- Remove the previous issues.
-	buffer.indicator_current = indicators.error
-	buffer:indicator_clear_range(0, buffer.length)
-	buffer.indicator_current = indicators.warning
-	buffer:indicator_clear_range(0, buffer.length)
-	buffer:eol_annotation_clear_all()
-	-- Mark the errors.
-	local error_index = 0
-	buffer.indicator_current = indicators.error
-	for at, issue in pairs(issues.errors) do
-		error_index = error_index + 1
-		buffer:indicator_fill_range(at, issue.length)
+	-- Count the issues.
+	local counts = {}
+	for _, issue_type in pairs(issue_types) do counts[issue_type] = 0 end
+	-- Mark the issues.
+	for _, issue in ipairs(issues) do
+		counts[issue.type] = counts[issue.type] + 1
+		buffer.indicator_current = indicator_types[issue.type]
+		buffer:indicator_fill_range(issue.at, issue.length)
 		buffer.eol_annotation_text[issue.line] =
 			buffer.eol_annotation_text[issue.line]..issue.message.."; "
-		buffer.eol_annotation_style[issue.line] = buffer:style_of_name("error")
-	end
-	-- Mark the warnings.
-	local warning_index = 0
-	buffer.indicator_current = indicators.warning
-	for at, issue in pairs(issues.warnings) do
-		warning_index = warning_index + 1
-		buffer:indicator_fill_range(at, issue.length)
-		buffer.eol_annotation_text[issue.line] =
-			buffer.eol_annotation_text[issue.line]..issue.message.."; "
-		buffer.eol_annotation_style[issue.line] = buffer:style_of_name("warning")
+		buffer.eol_annotation_style[issue.line] = annotation_styles[issue.type]
 	end
 	-- Notify the user.
-	local summary = ""
-	if error_index == 0 and warning_index == 0 then
-		summary = "No issues found."
-	else
-		if error_index > 0 then
-			summary = summary.."Errors: "..error_index
-		end
-		if error_index > 0 and warning_index > 0 then
-			summary = summary..", "
-		end
-		if warning_index > 0 then
-			summary = summary.."Warnings: "..warning_index
-		end
-	end
-	ui.statusbar_text = summary
+	update_statusbar(counts)
 end
 --------------------------------------------------------------------------------
 events.connect(events.INITIALIZED, init_styles)
