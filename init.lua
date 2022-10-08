@@ -114,11 +114,11 @@ local function update_statusbar(counts)
 end
 --------------------------------------------------------------------------------
 local function analyze_file()
-	ui.statusbar_text = "Analyzing file..."
 	-- Find an available analyzer.
 	local analyzer = analyzers[buffer:get_lexer()]
 	if not analyzer then return end
-	-- Remove the previous issues.
+	ui.statusbar_text = "Analyzing file..."
+	-- Clear  previous issues.
 	clear_issues()
 	-- Analyze the file.
 	local handle = os.spawn(
