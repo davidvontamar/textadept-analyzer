@@ -122,7 +122,7 @@ local function analyze_file()
 	clear_issues()
 	-- Analyze the file.
 	local handle = os.spawn(
-		analyzer.command.." "..buffer.filename,
+		analyzer.command..' "'..buffer.filename..'"',
 		io.get_project_root())
 	local issues = parse_issues(handle, analyzer)
 	handle:close()
