@@ -20,50 +20,44 @@ local indicator_styles = {}
 local indicator_colors = {}
 --------------------------------------------------------------------------------
 local function init_styles()
-	-- Define default colors
-	if not view.colors["error"] then view.colors["error"] = view.colors["red"] end
-	if not view.colors["warning"] then view.colors["warning"] = view.colors["yellow"] end
-	if not view.colors["info"] then view.colors["info"] = view.colors["blue"] end
-	-- Define defualt styles
-	if not view.styles["error"] then
-		view.styles["error"] = {
-			fore = view.colors["white"],
-			back = view.colors["error"],
-		}
-	end
-	if not view.styles["warning"] then
-		view.styles["warning"] = {
-			fore = view.colors["black"],
-			back = view.colors["warning"],
-		}
-	end
-	if not view.styles["info"] then
-		view.styles["info"] = {
-			fore = view.colors["white"],
-			back = view.colors["info"],
-		}
-	end
-	-- Names for statsbar summary
+	-- Names for statusbar summary
 	issue_names[issue_types.ERROR] = "error(s)"
 	issue_names[issue_types.WARNING] = "warning(s)"
 	issue_names[issue_types.INFO] = "note(s)"
 	-- Styles for annotations
-	annotation_styles[issue_types.ERROR] = buffer:style_of_name("error")
-	annotation_styles[issue_types.WARNING] = buffer:style_of_name("warning")
-	annotation_styles[issue_types.INFO] = buffer:style_of_name("info")
-	-- Indicator types
+	if not CURSES then
+		annotation_styles[issue_types.ERROR] = buffer:style_of_name("annotation")
+		annotation_styles[issue_types.WARNING] = buffer:style_of_name("annotation")
+		annotation_styles[issue_types.INFO] = buffer:style_of_name("annotation")
+	else
+		annotation_styles[issue_types.ERROR] = buffer:style_of_name("annotation")
+		annotation_styles[issue_types.WARNING] = buffer:style_of_name("annotation")
+		annotation_styles[issue_types.INFO] = buffer:style_of_name("annotation")
+	end
+	-- Indicators
 	indicator_types[issue_types.ERROR] = _SCINTILLA.next_indic_number()
 	indicator_types[issue_types.WARNING] = _SCINTILLA.next_indic_number()
 	indicator_types[issue_types.INFO] = _SCINTILLA.next_indic_number()
-	-- Styles for indicators
-	indicator_styles[issue_types.ERROR] = view.INDIC_SQUIGGLEPIXMAP
-	indicator_styles[issue_types.WARNING] = view.INDIC_SQUIGGLEPIXMAP
-	indicator_styles[issue_types.INFO] = view.INDIC_DOTS
-	-- Colors for indicators
-	indicator_colors[issue_types.ERROR] = view.colors["error"]
-	indicator_colors[issue_types.WARNING] = view.colors["warning"]
-	indicator_colors[issue_types.INFO] = view.colors["info"]
-	-- Apply styles
+	if not CURSES then
+		-- Indicator styles
+		indicator_styles[issue_types.ERROR] = view.INDIC_SQUIGGLEPIXMAP
+		indicator_styles[issue_types.WARNING] = view.INDIC_SQUIGGLEPIXMAP
+		indicator_styles[issue_types.INFO] = view.INDIC_DOTS
+		-- Indicator colors
+		indicator_colors[issue_types.ERROR] = view.colors["red"]
+		indicator_colors[issue_types.WARNING] = view.colors["yellow"]
+		indicator_colors[issue_types.INFO] = view.colors["blue"]
+	else
+		-- Indicator styles with CURSES
+		indicator_styles[issue_types.ERROR] = view.INDIC_STRAIGHTBOX
+		indicator_styles[issue_types.WARNING] = view.INDIC_STRAIGHTBOX
+		indicator_styles[issue_types.INFO] = view.INDIC_STRAIGHTBOX
+		-- Indicator colors with CURSES
+		indicator_colors[issue_types.ERROR] = view.colors["light_red"]
+		indicator_colors[issue_types.WARNING] = view.colors["light_yellow"]
+		indicator_colors[issue_types.INFO] = view.colors["light_blue"]
+	end
+	-- Apply indicator styles
 	for _, issue_type in pairs(issue_types) do
 		view.indic_style[indicator_types[issue_type]] = indicator_styles[issue_type]
 		view.indic_fore[indicator_types[issue_type]] = indicator_colors[issue_type]
