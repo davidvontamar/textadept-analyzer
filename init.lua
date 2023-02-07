@@ -119,7 +119,7 @@ local function analyze_file()
 		analyzer.command..' "'..buffer.filename..'"',
 		io.get_project_root())
 	local issues = parse_issues(handle, analyzer)
-	handle:close()
+	-- handle:close() -- Not needed in Textadept 12.0.
 	-- Count the issues.
 	local counts = {}
 	for _, issue_type in pairs(issue_types) do counts[issue_type] = 0 end
