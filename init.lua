@@ -35,9 +35,9 @@ local function init_styles()
 		annotation_styles[issue_types.INFO] = buffer:style_of_name("annotation")
 	end
 	-- Indicators
-	indicator_types[issue_types.ERROR] = _SCINTILLA.next_indic_number()
-	indicator_types[issue_types.WARNING] = _SCINTILLA.next_indic_number()
-	indicator_types[issue_types.INFO] = _SCINTILLA.next_indic_number()
+	indicator_types[issue_types.ERROR] = view.new_indic_number()
+	indicator_types[issue_types.WARNING] = view.new_indic_number()
+	indicator_types[issue_types.INFO] = view.new_indic_number()
 	if not CURSES then
 		-- Indicator styles
 		indicator_styles[issue_types.ERROR] = view.INDIC_SQUIGGLEPIXMAP
